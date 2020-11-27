@@ -1,0 +1,130 @@
+- hosts: galaxyserver
+  become: true
+  tags:
+    - galaxyserver
+  vars_files:
+    - secret_group_vars/global.vault
+    - group_vars/global.yml
+    - group_vars/galaxy.yml
+    - group_vars/slurm.yml
+    - group_vars/database.yml
+    - group_vars/certbot.yml
+#    - group_vars/rabbitmq.yml
+#    - group_vars/rabbitmq_proxy.yml
+
+  pre_tasks:
+    - name: pre-roles
+      include_role:
+        name: geerlingguy.repo-epel
+
+    - name: Install Dependencies
+      package:
+        name:
+          - "python3"
+          - "python3-psycopg2"
+          - "python-psycopg2"
+          - "git"
+          - "python36-virtualenv"
+          - "make"
+          - "bzip2"
+          - "postgresql"
+          - "jq"
+          - "tmpwatch"
+          - 'vim'
+          - 'mlocate'
+          - 'singularity'
+
+    - name: Open firewalld ports
+      tags: firewall-setup
+      become: true
+      include: tasks/firewall.yml ports="['ssh', 'http', 'https', 'amqp', 'amqps']"
+
+    - name: Create users and groups
+      tags: create_users
+      include: tasks/users_groups.yml
+
+
+  tasks:
+    - name: tweak system to run galaxy
+      include: tasks/system.yml
+    - name: Perform misc galaxy tasks
+      include: tasks/galaxy.yml
+#    - name: setup rabbitmq certs, vhosts and users
+#      include: tasks/rabbitmq.yml
+#      tags:
+#        - rabbitmq
+
+  handlers:
+    - name: Restart Galaxy
+      systemd:
+        name: galaxy
+        state: restarted
+#    - name: restart rabbitmq
+#      systemd:
+#        name: rabbitmq-server
+#        state: restarted
+
+  roles:
+    - geerlingguy.repo-epel
+    - geerlingguy.pip
+    - galaxyproject.repos
+    - galaxyproject.postgresql
+    - role: natefoo.postgresql_objects
+      become: true
+      become_user: postgres
+    - role: galaxyproject.galaxy
+    - role: uchida.miniconda
+    - usegalaxy_eu.galaxy_systemd
+    - galaxyproject.nginx
+    - galaxyproject.cvmfs
+#    - galaxyproject.slurm
+    - usegalaxy_eu.gxadmin
+    - role: reallyenglish.dhclient
+      when: "env != 'production'"
+    - role: nbigot.ansible-fail2ban
+      tags: fail2ban
+    - role: weareinteractive.sudo
+
+
+
+  post_tasks:
+    - name: Install slurm-drmaa
+      package:
+        name: slurm-drmaa
+    # TODO: This should not be needed, but...
+    - name: galaxy need a compliance log for conda, will otherwise fail.
+      file:
+        path: "{{ galaxy_root }}/server/compliance.log"
+        state: file
+        mode: "0644"
+        owner: "{{ galaxy_user.name }}"
+
+    - name: galaxy dependencies dir (?)
+      file:
+        path: "{{ galaxy_root }}/server/dependencies"
+        state: directory
+        mode: "0755"
+        owner: "{{ galaxy_user.name }}"
+
+    - name: make galaxy root readable for nginx
+      file:
+        path: "{{ galaxy_root }}"
+        state: directory
+        mode: "0755"
+        owner: "{{ galaxy_user.name }}"
+        group: "{{ galaxy_user.name }}"
+
+    - name: Make sure galaxy owns tool-data
+      file:
+        path: "{{ galaxy_root }}/server/tool-data"
+        state: directory
+        recurse: yes
+        mode: "0755"
+        owner: "{{ galaxy_user.name }}"
+
+    - name: Make sure galaxy owns /sanitize_whitelist.txt
+      file:
+        path: "{{ galaxy_mutable_config_dir }}/sanitize_whitelist.txt"
+        state: file
+        mode: "0755"
+        owner: "{{ galaxy_user.name }}"

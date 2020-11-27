@@ -1,0 +1,15 @@
+- name: Set timezone to Europe/Oslo
+  timezone:
+    name: Europe/Oslo
+
+- name: SELinux
+  selinux:
+    policy: targeted
+    state: permissive
+  tags:
+    - selinux
+- name: Disable ipv6
+  sysctl:
+    name: net.ipv6.conf.eth0.disable_ipv6
+    value: '1'
+    state: present

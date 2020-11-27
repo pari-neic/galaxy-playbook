@@ -1,9 +1,9 @@
 [galaxyserver]
-test.covid-19.usegalaxy.no ansible_host=158.39.201.218
+covid-19.test.usegalaxy.no ansible_host=158.39.201.218 ansible_user=centos
 
 [database]
-test.covid-19.usegalaxy.no ansible_host=158.39.201.218
+covid-19.test.usegalaxy.no ansible_host=158.39.201.218 ansible_user=centos
 
 [slurm]
-test.covid-19.usegalaxy.no ansible_host=158.39.201.218
+covid-19.test.usegalaxy.no ansible_host=158.39.201.218 ansible_user=centos
 

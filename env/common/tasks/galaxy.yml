@@ -1,0 +1,148 @@
+---
+- name: Add branding
+  tags: branding
+  copy:
+    src: templates/galaxy/static/
+    dest: "{{ galaxy_root }}/server/static/"
+    owner: root
+    group: root
+    mode: "0644"
+#    force: yes
+
+- name: Add welcome.html (a hack, as uses a template!)
+  tags: branding
+  template:
+    src: templates/galaxy/static/welcome.html.j2
+    dest: "{{ galaxy_root }}/server/static/welcome.html"
+    owner: root
+    group: root
+    mode: "0644"
+#    force: yes
+
+- name: add client scss
+  tags: branding
+  copy:
+    src: templates/galaxy/client/blue.scss
+    dest: "{{ galaxy_root }}/server/client/src/style/scss/theme/blue.scss"
+    owner: root
+    group: root
+    mode: "0644"
+  #    force: yes
+#  register: scss_file
+
+
+- name: Make sure compliance log exists
+  file:
+    path: "{{ galaxy_root }}/server/compliance.log"
+    state: touch
+    mode: "0600"
+    owner: "{{ galaxy_user.name }}"
+
+- name: Copy invfile.lua file
+  copy:
+    src: files/galaxy/mulled/invfile.lua
+    dest: "{{ galaxy_root }}/server/lib/galaxy/tool_util/deps/mulled/invfile.lua"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Make sure pulsar directories exists
+  file:
+    path: "{{ galaxy_root }}/server/database/{{ item }}"
+    state: directory
+    mode: "0700"
+    owner: "{{ galaxy_user.name }}"
+  with_items:
+    - pulsar_persisted_data
+    - pulsar_staging
+
+- name: setup log dir for galaxy
+  file:
+    path: "{{ galaxy_log_dir }}"
+    state: directory
+    owner: "{{ galaxy_user.name }}"
+    group: "{{ galaxy_user.name }}"
+    mode: "0755"
+  when: no
+
+- name: Setup log-rotate
+  become: true
+  include: tasks/logrotate.yml
+
+# For gxadmin:
+- name: Add env vars in bashrc
+  become: true
+  become_user: galaxy
+  lineinfile:
+    path: "~/.bashrc"
+    regexp: "^export {{ item.var }}"
+    line: "export {{ item.var }}={{ item.val }}"
+  with_items:
+    - var: GDPR_MODE
+      val: "$(openssl rand -hex 24 2>/dev/null)"
+    - var: GALAXY_ROOT
+      val: "{{ galaxy_root }}"
+    - var: GALAXY_CONFIG_DIR
+      val: "{{ galaxy_root }}/config"
+    - var: GALAXY_CONFIG_FILE
+      val: "{{ galaxy_root }}/config/galaxy.yml"
+    - var: GALAXY_LOG_DIR
+      val: "{{ galaxy_log_dir }}"
+    - var: PGUSER
+      val: "{{ galaxy_db_user }}"
+    - var: PGHOST
+      val: '{{ groups["database"][0] }}'
+    - var: PGDATABASE
+      val: "{{ galaxy_database }}"
+
+- name: Copy using the 'content' for inline data
+  become: true
+  become_user: galaxy
+  copy:
+    content: |
+      {{ groups['database'][0] }}:5432:*:{{ galaxy_db_user }}:{{ galaxy_db_passwd }}
+    dest: "~/.pgpass"
+    mode: "0600"
+
+
+- name: test to see if selinux is running
+  command: getenforce
+  register: sestatus
+  changed_when: false
+
+- name: Allow nginx httpd_sys_content_t to access the static files
+  sefcontext:
+    target: "{{ item }}(/.*)?"
+    setype: httpd_sys_content_t
+    state: present
+  register: update_fcontexts
+  with_items: "{{ galaxy_selinux_web_access_dirs }}"
+  when: '"Enabled" in sestatus.stdout'
+  tags:
+    - selinux
+
+- name: Apply new SELinux file context to filesystem
+  command: "restorecon -rv {{ item }}"
+  with_items: "{{ galaxy_selinux_web_access_dirs }}"
+  when: update_fcontexts.changed
+  tags:
+    - selinux
+
+- name: Cron job for cleaning Galaxy histories
+  cron:
+    name: "clean histories"
+    minute: "07"
+    hour: "5"
+    weekday: "6"
+    user: "{{ galaxy_user.name }}"
+    job: "/usr/local/bin/gxadmin galaxy cleanup 30"
+
+- name: Add tmpwatch cron job
+  cron:
+    name: "Remove old Galaxy tmp files"
+    minute: "30"
+    hour: "5"
+    user: "{{ galaxy_user.name }}"
+    job: "tmpwatch -m 3d /srv/galaxy/var/tmp"
+
+

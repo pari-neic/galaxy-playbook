@@ -1,0 +1,27 @@
+---
+- name: add firewalls
+  block:
+    - name: Ensure firewalld is installed
+      package:
+        name: firewalld
+
+    - name: systemd start of firewalld
+      systemd:
+        state: started
+        enabled: yes
+        name: firewalld
+
+- name: opening firewall for port
+  firewalld:
+    service: "{{item}}"
+    permanent: true
+    state: enabled
+    immediate: yes
+    zone: public
+  loop: "{{ports}}"
+
+
+
+
+
+

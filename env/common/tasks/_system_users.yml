@@ -1,0 +1,58 @@
+---
+- name: Create system users
+  block:
+#    - debug:
+#        msg: "Adding {{user.name}} to {{ inventory_hostname }}"
+#        msg: "Adding {{user.name}} to {{ inventory_hostname }} ]]  {{user.group_names}} / {{group_names}} --> {{user.group_names | intersect(group_names)|length }}"
+
+    - name: Add {{user.name }} user to hosts
+      become: true
+      user:
+        name: "{{ user.name }}"
+        uid: "{{ user.uid }}"
+        shell: "{{ user.shell }}"
+        group: "{{ user.group }}"
+        groups: "{{ user.groups | default('') }}"
+        create_home: "{{ user.create_home }}"
+
+    - name: ssh keys available for {{ user.name }}
+      become: false
+      local_action: stat path=files/ssh/{{ user.name }}/authorized_keys.vault
+      register: ssh_keys_file
+
+#    - debug:
+#        msg: "ssh key stat files/ssh/{{ user.name }}_authorized_keys.vault  /{{ ssh_keys_file }}"
+
+    - name: Create ssh dir for {{user.name}}
+      file:
+        dest: ~{{ user.name }}/.ssh/
+        state: directory
+        owner: "{{ user.name }}"
+        group: "{{ user.group }}"
+        mode: 0700
+
+      when: ssh_keys_file.stat.exists
+
+
+    - name: Copy {{user.name}} ssh keys to host
+      copy:
+        src: files/ssh/{{ user.name }}/authorized_keys.vault
+        dest: ~{{ user.name }}/.ssh/authorized_keys
+        owner: "{{ user.name }}"
+        group: "{{ user.group }}"
+        mode: 0600
+      when: ssh_keys_file.stat.exists
+
+
+    - name: setup sudoers file
+      template:
+        src: files/sudoers/sudoers
+        dest: /etc/sudoers
+        backup: yes
+        owner: root
+        group: root
+        mode: 0440
+        validate: /usr/sbin/visudo -cf %s
+
+  when: (user.group_names | intersect(group_names)|length) or
+        (user.group_names[0] == 'all')

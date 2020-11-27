@@ -1,0 +1,45 @@
+---
+# GDPR specific logrotations.
+- name: setup usegalaxy.no specific logrotates
+  block:
+
+    - name: "collect host information"
+      package_facts:
+        manager: "auto"
+
+    - name: "nginx logrotate"
+      template:
+        src: files/system/logrotate.nginx
+        dest: /etc/logrotate.d/nginx
+        mode: 0644
+        owner: root
+        group: root
+        backup: yes
+      when: "'nginx' in ansible_facts.packages"
+
+
+    - name: check for galaxy installataion
+      stat:
+        path: "{{galaxy_root}}"
+      register: galaxy_installation
+
+
+    - name: "messages logrotate"
+      template:
+        src: files/system/logrotate.syslog
+        dest: /etc/logrotate.d/syslog
+        mode: 0644
+        owner: root
+        group: root
+        backup: yes
+      when: galaxy_installation.stat.isdir
+
+    - name: uwsgi log stripper script
+      copy:
+        src: files/bin/log_strip_out_uwsgi.py
+        dest: /usr/local/bin/log_strip_out_uwsgi.py
+        mode: 0755
+        owner: root
+        group: root
+        backup: yes
+      when: galaxy_installation.stat.isdir
