@@ -17,6 +17,17 @@
       include_role:
         name: geerlingguy.repo-epel
 
+    - name: set hostname
+      hostname:
+        name: "{{inventory_hostname}}"
+
+#    - name: Add IP address of host
+#      lineinfile:
+#        dest: /etc/hosts
+#        regexp: '.*{{ inventory_hostname }}.*$'
+#        line: "{{ ansible_default_ipv4['address']}} {{inventory_hostname_short}} {{inventory_hostname}} "
+#        state: present
+
     - name: Install Dependencies
       package:
         name:
@@ -49,10 +60,15 @@
       include: tasks/system.yml
     - name: Perform misc galaxy tasks
       include: tasks/galaxy.yml
-#    - name: setup rabbitmq certs, vhosts and users
-#      include: tasks/rabbitmq.yml
-#      tags:
-#        - rabbitmq
+
+#    - name: make dir for slurm (should not be needed!)
+#      file:
+#        path: /etc/slurm/
+#        state: directory
+#        mode: "0755"
+#        owner: root
+#        group: root
+
 
   handlers:
     - name: Restart Galaxy
@@ -76,8 +92,9 @@
     - role: uchida.miniconda
     - usegalaxy_eu.galaxy_systemd
     - galaxyproject.nginx
-    - galaxyproject.cvmfs
-#    - galaxyproject.slurm
+    - role: galaxyproject.cvmfs
+      tags: cvmfs
+    - galaxyproject.slurm
     - usegalaxy_eu.gxadmin
     - role: reallyenglish.dhclient
       when: "env != 'production'"
