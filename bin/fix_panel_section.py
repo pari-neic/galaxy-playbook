@@ -48,6 +48,8 @@ def main():
     workflow_tools = read_yaml( args.workflow_tools )
 
     for t in workflow_tools['tools']:
+        if t['name'] not in  tool_panel:
+            tool_panel[t['name']] = 'Other tools'
         t['tool_panel_section_label'] = tool_panel[t['name']]
 
     with open(args.outfile, 'w') as file:

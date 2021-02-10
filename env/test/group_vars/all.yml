@@ -2,7 +2,7 @@ domain: usegalaxy.no
 env: testing
 
 galaxy_commit_id: release_20.09
-galaxy_database: "covid19-usegalaxy-test"
+galaxy_database: "covid19_usegalaxy_test"
 
 
 cvmfs_quota_limit: 2000

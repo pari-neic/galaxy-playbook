@@ -1,3 +1,6 @@
+slurm_roles: ["exec", "controller"] #, "dbd"
+
+
 slurm_cgroup_config:
   CgroupMountpoint: "/sys/fs/cgroup"
   CgroupAutomount: yes
@@ -19,8 +22,8 @@ slurm_config:
   SelectType: select/cons_res
   ProctrackType: proctrack/cgroup
   JobAcctGatherType: jobacct_gather/cgroup
-  AccountingStorageType: accounting_storage/slurmdbd
-  AccountingStorageHost: "{{ galaxy_host }}"
+#  AccountingStorageType: accounting_storage/slurmdbd
+#  AccountingStorageHost: "{{ galaxy_host }}"
   SelectTypeParameters: CR_Core_Memory
   ControlMachine: "{{ galaxy_host }}"
   SlurmctldLogFile: /var/log/slurm/slurmctld.log
@@ -42,17 +45,11 @@ slurmdbd_config:
   StorageLoc: slurm_acct_db
 slurm_nodes:
   - name: "{{ galaxy_host }}"
-    CoresPerSocket: "{{ hostvars[galaxy_host].ansible_processor_cores }}"
-    Sockets: "{{ hostvars[galaxy_host].ansible_processor_count }}"
+    CoresPerSocket: "{{ hostvars[galaxy_host].ansible_processor_cores  }}"
+    Sockets: "{{ hostvars[galaxy_host].ansible_processor_count - 2}}"
     ThreadsPerCore: "{{ hostvars[galaxy_host].ansible_processor_threads_per_core }}"
-    CPUs: "{{ hostvars[galaxy_host].ansible_processor_vcpus }}"
-    RealMemory: "{{ hostvars[galaxy_host].ansible_memtotal_mb }}"
-  - name: "{{ slurm_host }}"
-    CoresPerSocket: "{{ hostvars[slurm_host].ansible_processor_cores }}"
-    Sockets: "{{ hostvars[slurm_host].ansible_processor_count }}"
-    ThreadsPerCore: "{{ hostvars[slurm_host].ansible_processor_threads_per_core }}"
-    CPUs: "{{ hostvars[slurm_host].ansible_processor_vcpus }}"
-    RealMemory: "{{ hostvars[slurm_host].ansible_memtotal_mb }}"
+    CPUs: "{{ hostvars[galaxy_host].ansible_processor_vcpus - 2}}"
+    RealMemory: "{{ hostvars[galaxy_host].ansible_memtotal_mb - 10000 }}"
 slurm_partitions:
   - name: "usegalaxy_{{ env }}"
     Default: YES
@@ -85,12 +82,11 @@ galaxy_cvmfs_repos_enabled: config-repo
 cvmfs_server_urls:
   - domain: galaxyproject.org
     use_geoapi: yes
-    #key_dir: "/cvmfs/cvmfs-config.galaxyproject.org/etc/cvmfs/keys/galaxyproject.org/"
+    key_dir: "/cvmfs/cvmfs-config.galaxyproject.org/etc/cvmfs/keys/galaxyproject.org/"
     urls:
       #- "http://invivo.hpc.uio.no/cvmfs/@fqrn@"
       - "http://cvmfs1-ufr0.galaxyproject.eu/cvmfs/@fqrn@"
       - "http://cvmfs1-psu0.galaxyproject.org/cvmfs/@fqrn@"
       - "http://cvmfs1-iu0.galaxyproject.org/cvmfs/@fqrn@"
       - "http://cvmfs1-tacc0.galaxyproject.org/cvmfs/@fqrn@"
-      #- "http://cvmfs1-mel0.gvl.org.au/cvmfs/@fqrn@"
 

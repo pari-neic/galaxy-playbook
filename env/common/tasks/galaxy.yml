@@ -2,8 +2,8 @@
 - name: Add branding
   tags: branding
   copy:
-    src: templates/galaxy/static/
-    dest: "{{ galaxy_root }}/server/static/"
+    src: templates/galaxy/static/welcome.html
+    dest: "{{ galaxy_root }}/server/static/welcome.html"
     owner: root
     group: root
     mode: "0644"
@@ -18,17 +18,6 @@
     group: root
     mode: "0644"
 #    force: yes
-
-- name: add client scss
-  tags: branding
-  copy:
-    src: templates/galaxy/client/blue.scss
-    dest: "{{ galaxy_root }}/server/client/src/style/scss/theme/blue.scss"
-    owner: root
-    group: root
-    mode: "0644"
-  #    force: yes
-#  register: scss_file
 
 
 - name: Make sure compliance log exists

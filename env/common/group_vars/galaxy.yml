@@ -192,7 +192,6 @@ nginx_servers:
 nginx_enable_default_server: false
 nginx_ssl_servers:
   - galaxy
-  - galaxy-gie-proxy
 nginx_conf_http:
   client_max_body_size: 1g
 nginx_ssl_role: usegalaxy_eu.certbot

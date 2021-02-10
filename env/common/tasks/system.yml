@@ -8,6 +8,7 @@
     state: permissive
   tags:
     - selinux
+
 - name: Disable ipv6
   sysctl:
     name: net.ipv6.conf.eth0.disable_ipv6
