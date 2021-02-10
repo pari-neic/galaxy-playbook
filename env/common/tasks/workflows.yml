@@ -1,0 +1,20 @@
+---
+
+- name: delete old data
+  file:
+    path: workflows
+    state: absent
+
+- name: download workflows
+  command: ../../bin/pull_covid_workflows.py
+
+- name: download tool list from usegalaxy.eu
+  command: get-tool-list -g usegalaxy.eu -o workflows/usegalaxy-eu-tools.yml
+
+- name: extract tools from workflows
+  shell: workflow-to-tools -w  workflows/*ga -o workflows/workflow-tools.yml
+
+- name: fix tool section
+  command: ../../bin/fix_panel_section.py -g workflows/usegalaxy-eu-tools.yml -w workflows/workflow-tools.yml -o workflows/workflow-tools-fixed.yml
+
+
