@@ -27,19 +27,6 @@ galaxy_jobconf:
       load: galaxy.jobs.runners.slurm:SlurmJobRunner
     - id: local
       load: galaxy.jobs.runners.local:LocalJobRunner
-    - id: pulsar_embedded
-      load: galaxy.jobs.runners.pulsar:PulsarEmbeddedJobRunner
-    - id: pulsar_no_test
-      load: galaxy.jobs.runners.pulsar:PulsarMQJobRunner
-      params:
-        amqp_url: "amqp://test:{{ rabbitmq_password_galaxy_test }}@{{ pulsar_rabbitmq_proxy }}//test?ssl=1"
-        galaxy_url: "https://{{ galaxy_host }}"
-        manager: _default_
-        amqp_acknowledge: True
-        amqp_ack_republish_time: 300
-        amqp_consumer_timeout: 2.0
-        amqp_publish_retry: True
-        amqp_publish_retry_max_retries: 60
   default_destination: gateway_1x
   destinations:
     - id: local
@@ -87,15 +74,4 @@ galaxy_jobconf:
     - type: "destination_user_concurrent_jobs"
       id: "sh_fdid_slurm_intensive_jobs"
       value: "10"
-
-# NeLS prod settings.
-nels_url: https://test-fe.cbu.uib.no
-nels_storage_url: "{{nels_url}}/nels/welcome.xhtml"
-nels_storage_api_url: "{{nels_url}}/nels-storage2"
-nels_storage_import_tool_dir: "{{ galaxy_server_dir }}/tools/data_source"
-nels_storage_export_tool_dir: "{{ galaxy_server_dir }}/tools/data_destination"
-nels_storage_config_dir: "{{ galaxy_config['galaxy']['tool_data_path'] }}"
-nels_storage_tool_conf_dir: "{{ galaxy_server_dir }}/config"
-nels_user_portal_url: "{{nels_url}}/welcome.xhtml"
-
 

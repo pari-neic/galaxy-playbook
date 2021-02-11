@@ -62,8 +62,8 @@ galaxy_config:
     message_box_content: The usegalaxy.no is still undergoing testing but we will be live Oct 21st 2020.  Not for production use!
     container_image_cache_path: /srv/galaxy/containers
     enable_mulled_containers: true
-#    containers_resolvers_config_file: "{{ galaxy_config_dir }}/container_resolvers_conf.xml"
-#    dependency_resolvers_config_file: "{{ galaxy_config_dir }}/dependency_resolvers_conf.xml"
+    containers_resolvers_config_file: "{{ galaxy_config_dir }}/container_resolvers_conf.xml"
+    dependency_resolvers_config_file: "{{ galaxy_config_dir }}/dependency_resolvers_conf.xml"
 #    conda_ensure_channels: iuc,conda-forge,bioconda,defaults,https://galaxy-ntnu.bioinfo.no/nelsconda/
 
     nginx_x_accel_redirect_base: "/_x_accel_redirect"
@@ -100,37 +100,23 @@ galaxy_systemd_zergling_env: "DRMAA_LIBRARY_PATH=/usr/lib64/libdrmaa.so.1"
 
 galaxy_singularity_images_cvmfs_path: "/cvmfs/singularity.galaxyproject.org/all/"
 galaxy_handler_count: "{{ galaxy_systemd_handlers }}"
-pulsar_rabbitmq_proxy: "{{ groups['database'][0] }}"
 
 galaxy_config_files:
   - src: files/galaxy/config/job_metrics_conf.xml
     dest: "{{ galaxy_config['galaxy']['job_metrics_config_file'] }}"
-  - src: files/galaxy/config/tool_conf_interactive.xml
-    dest: "{{ galaxy_config_dir }}/tool_conf_interactive.xml"
   - src: files/galaxy/tools/sanitize_whitelist.txt
     dest: "{{ galaxy_mutable_config_dir }}/sanitize_whitelist.txt"
-  - src: files/galaxy/tools/interactive/interactivetool_jupyter_notebook.xml
-    dest: "{{ galaxy_server_dir }}/tools/interactive/interactivetool_jupyter_notebook.xml"
   - src: files/galaxy/config/dependency_resolvers_conf.xml
     dest: "{{ galaxy_config_dir }}/dependency_resolvers_conf.xml"
-  - src: files/galaxy/config/tool_sheds_conf.xml
-    dest: "{{ galaxy_config_dir }}/tool_sheds_conf.xml"
 
 galaxy_tool_config_files:
   - "{{ galaxy_config_dir }}/tool_conf.xml"
-  - "{{ galaxy_config_dir }}/tool_conf_interactive.xml"
 
 galaxy_config_templates:
   - src: files/galaxy/config/tool_conf.xml
     dest: "{{ galaxy_config_dir }}/tool_conf.xml"
   - src: templates/galaxy/config/job_conf.xml.j2
     dest: "{{ galaxy_config['galaxy']['job_config_file'] }}"
-  - src: templates/galaxy/config/reports.yml
-    dest: "{{ galaxy_config_dir }}/reports.yml"
-  - src: templates/galaxy/config/pulsar_app.yml.j2
-    dest: "{{ galaxy_config_dir }}/pulsar_app.yml"
-  - src: templates/galaxy/config/container_resolvers_conf.xml.j2
-    dest: "{{ galaxy_config_dir }}/container_resolvers_conf.xml"
   - src: templates/galaxy/config/container_resolvers_conf.xml.j2
     dest: "{{ galaxy_config_dir }}/container_resolvers_conf.xml"
 
