@@ -1,0 +1,10 @@
+---
+
+- name: Restart dhclient
+  service:
+    name: dhclient
+    arguments: "{{ dhclient_interface }}"
+    state: restarted
+
+- name: Restart network OpenBSD
+  shell: "sh /etc/netstart {{ dhclient_interface }} restart"

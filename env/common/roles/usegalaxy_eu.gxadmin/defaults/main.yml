@@ -1,0 +1,6 @@
+---
+
+gxadmin_dir: "/opt/gxadmin"
+gxadmin_bin_dir: "/usr/local/bin"
+gxadmin_create_bin_dir: true
+gxadmin_repo: "https://github.com/usegalaxy-eu/gxadmin.git"

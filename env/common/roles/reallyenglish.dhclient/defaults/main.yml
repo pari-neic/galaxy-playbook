@@ -1,0 +1,5 @@
+dhclient_config_file: "{{ __dhclient_config_file }}"
+dhclient_config: []
+dhclient_service: "{{ __dhclient_service }}"
+
+dhclient_interface: ""

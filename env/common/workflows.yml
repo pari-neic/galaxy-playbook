@@ -1,0 +1,22 @@
+- hosts: localhost
+  connection: local
+  tags:
+    - export
+  tasks:
+    - name: download workflows and tool list
+      include: tasks/workflows.yml
+
+
+- hosts: galaxyserver
+  tags:
+    - import
+
+  vars_files:
+    secret_group_vars/global.vault
+  tasks:
+    - name: import workflows
+      local_action: command workflow-install -g {{inventory_hostname}} -a {{galaxy_admin_api_key}} -w workflows --publish
+
+    - name: import workflow-tools
+      local_action: command shed-tools install -a {{galaxy_admin_api_key}} -g {{inventory_hostname}} -t workflows/workflow-tools-fixed.yml --skip_install_repository_dependencies
+

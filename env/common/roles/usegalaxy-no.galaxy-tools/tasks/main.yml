@@ -1,0 +1,26 @@
+---
+# tasks file for ansible-role-ehos
+- name: Install and cofigure galaxy-tools
+
+  block:
+
+    - name: Install Dependencies
+      package:
+        name:
+          - "gcc"
+
+    - name: Git checkout of galaxy-tools
+      git:
+        repo: 'https://github.com/usegalaxy-no/galaxy-tools.git'
+        dest: "{{ galaxy_tools_dir }}"
+
+    - name: create venv in {{ galaxy_tools_dir }}
+      command:
+        chdir: "{{  galaxy_tools_dir }}"
+        cmd: python3 -m venv venv
+        creates: "{{  galaxy_tools_dir }}/venv"
+
+    - name: Install specified python requirements for galaxy-tools
+      pip:
+        requirements: "{{  galaxy_tools_dir }}/requirements.txt"
+        virtualenv: "{{  galaxy_tools_dir }}/venv"

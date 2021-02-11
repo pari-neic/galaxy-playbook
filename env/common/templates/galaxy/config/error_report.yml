@@ -1,0 +1,5 @@
+# The default Email bug reporter. By default, the standard
+# configuration is taken from your galaxy.ini
+- type: email
+  verbose: true
+  user_submission: true

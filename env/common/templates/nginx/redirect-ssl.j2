@@ -1,0 +1,15 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+# disabled this for all traffic to be redirected to https
+#    server_name "{{ inventory_hostname }}";
+# test to see if this file is being used!
+
+    location /.well-known/ {
+        root {{ certbot_well_known_root | default( '/tmp/nginx_well_known')}};
+    }
+
+    location / {
+        return 302 https://$host$request_uri;
+    }
+}
