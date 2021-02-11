@@ -61,14 +61,6 @@
     - name: Perform misc galaxy tasks
       include: tasks/galaxy.yml
 
-#    - name: make dir for slurm (should not be needed!)
-#      file:
-#        path: /etc/slurm/
-#        state: directory
-#        mode: "0755"
-#        owner: root
-#        group: root
-
 
   handlers:
     - name: Restart Galaxy

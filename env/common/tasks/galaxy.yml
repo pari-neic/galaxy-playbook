@@ -7,18 +7,8 @@
     owner: root
     group: root
     mode: "0644"
+    backup: true
 #    force: yes
-
-- name: Add welcome.html (a hack, as uses a template!)
-  tags: branding
-  template:
-    src: templates/galaxy/static/welcome.html.j2
-    dest: "{{ galaxy_root }}/server/static/welcome.html"
-    owner: root
-    group: root
-    mode: "0644"
-#    force: yes
-
 
 - name: Make sure compliance log exists
   file:
@@ -34,29 +24,6 @@
     owner: root
     group: root
     mode: "0644"
-
-- name: Make sure pulsar directories exists
-  file:
-    path: "{{ galaxy_root }}/server/database/{{ item }}"
-    state: directory
-    mode: "0700"
-    owner: "{{ galaxy_user.name }}"
-  with_items:
-    - pulsar_persisted_data
-    - pulsar_staging
-
-- name: setup log dir for galaxy
-  file:
-    path: "{{ galaxy_log_dir }}"
-    state: directory
-    owner: "{{ galaxy_user.name }}"
-    group: "{{ galaxy_user.name }}"
-    mode: "0755"
-  when: no
-
-- name: Setup log-rotate
-  become: true
-  include: tasks/logrotate.yml
 
 # For gxadmin:
 - name: Add env vars in bashrc
@@ -84,7 +51,7 @@
     - var: PGDATABASE
       val: "{{ galaxy_database }}"
 
-- name: Copy using the 'content' for inline data
+- name: Copy using the 'content' for inline data for gxadmin
   become: true
   become_user: galaxy
   copy:
