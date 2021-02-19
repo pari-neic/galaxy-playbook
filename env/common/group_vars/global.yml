@@ -2,6 +2,7 @@ system_groups:
   - { name: galaxy, gid: 1024, group_names: ["galaxyserver", "slurm"] }
   - { name: slurm, gid: 1025, group_names: ["galaxyserver", "slurm"] }
   - { name: docker, gid: 1028, group_names: ["galaxyserver", "slurm"] }
+  - { name: sysadmin, gid: 1027, group_names: ["all"] }
 
 system_users:
   - {
@@ -21,6 +22,15 @@ system_users:
       create_home: no,
       group_names: ["galaxyserver", "slurm"],
     }
+  - {
+    name: sysadmin,
+    uid: 1027,
+    group: sysadmin,
+    shell: /bin/bash,
+    create_home: yes,
+    group_names: ["all", "systemd-journal"],
+  }
+
 
 galaxy_host: "{{ groups['galaxyserver'][0] }}"
 galaxy_ip: "{{ hostvars[galaxy_host].ansible_host }}"
