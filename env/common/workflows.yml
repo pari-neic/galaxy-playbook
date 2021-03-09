@@ -18,5 +18,5 @@
       local_action: command workflow-install -g {{inventory_hostname}} -a {{galaxy_admin_api_key}} -w workflows --publish
 
     - name: import workflow-tools
-      local_action: command shed-tools install -a {{galaxy_admin_api_key}} -g {{inventory_hostname}} -t workflows/workflow-tools-fixed.yml 
+      local_action: command shed-tools install -a {{galaxy_admin_api_key}} -g {{inventory_hostname}} -t workflows/workflow-tools-fixed.yml
 
