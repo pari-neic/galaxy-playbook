@@ -47,9 +47,9 @@ def main():
     tool_panel     = tool_to_panel(read_yaml( args.galaxy_tools ))
     workflow_tools = read_yaml( args.workflow_tools )
 
-    workflow_tools['install_repository_dependencies'] = false
-    workflow_tools['install_resolver_dependencies'] = false
-    workflow_tools['install_tool_dependencies'] =false
+    workflow_tools['install_repository_dependencies'] = False
+    workflow_tools['install_resolver_dependencies'] = False
+    workflow_tools['install_tool_dependencies'] = False
 
     for t in workflow_tools['tools']:
         if t['name'] not in  tool_panel:
