@@ -1,7 +1,6 @@
 # neic-pari infrastructure playbooks
 
-Deployment of usegalaxy
-=======================
+## Deployment of usegalaxy
 
 
 The infrastructure is orchestrated by two ansible playbooks. These playbooks define and control
@@ -19,18 +18,17 @@ In order to use these you will need the project ansible-vault password. If you d
 Setting up a fresh repository with all the useglaxy.no infrastructure playbooks
 
 
-Initial setup
--------------
+### Initial setup
 
-.. code-block:: bash
+
+```bash
 
   # clone the usegalaxy repository
   git clone git@github.com:pari-neic/galaxy-playbbook.git
 
   cd galaxy-playbbook
 
-  # setup the pre-commit hook that ensures no unencrypted vault-files
-  # are commited
+  # setup the pre-commit hook that ensures no unencrypted vault-files are commited
   cp pre-commit .git/hooks/
   chmod 755 .git/hooks/pre-commit  
 
@@ -50,16 +48,14 @@ Initial setup
 
   # Enter project password into vault_password
   $EDITOR vault_password
+  
+```
 
 
 
+### Deploying an infrastructure
 
-Deploying an infrastructure
----------------------------
-
-
-.. code-block:: bash
-
+```bash
   # Change into either main or test environment
   cd env/test
 
@@ -67,9 +63,7 @@ Deploying an infrastructure
   # As the nrec user is centos this needs to be run slightly differently
   ansible-playbook -e "ansible_user=centos" galaxy.yml
 
-
-
   # install workflows and related tools 
   ansible-playbook workflows.yml
-
-
+  
+```
